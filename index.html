@@ -92,6 +92,10 @@ svg{display:block}
 .zoom button{width:38px;height:36px;display:grid;place-items:center;font-size:21px;line-height:1}
 .zoom button:active{background:rgba(var(--text-rgb),.08)}
 .zoom span{padding:0 2px;font-size:13px;font-weight:600;color:var(--muted)}
+.zoom.tr{margin-left:0}
+.tr span{min-width:68px;text-align:center;font-variant-numeric:tabular-nums}
+.tr.on{border-color:rgba(var(--accent-rgb),.65)}
+.tr.on span{color:var(--accent)}
 .nav{display:flex;align-items:center;gap:8px}
 .nav-btn{flex:0 0 auto;width:38px;height:34px;display:grid;place-items:center;border-radius:9px;background:var(--panel);border:1px solid var(--line)}
 .nav-btn svg{width:18px;height:18px}
@@ -202,6 +206,11 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
       <span aria-hidden="true">Keys</span>
       <button type="button" id="zoomIn" aria-label="Bigger keys" title="Bigger keys">+</button>
     </div>
+    <div class="zoom tr" role="group" aria-label="Transpose" id="trGroup">
+      <button type="button" id="trDown" aria-label="Transpose down a semitone" title="Down a semitone">−</button>
+      <span id="trVal">Transpose</span>
+      <button type="button" id="trUp" aria-label="Transpose up a semitone" title="Up a semitone">+</button>
+    </div>
   </div>
   <div class="nav">
     <button class="nav-btn" type="button" id="octDown" aria-label="Move down an octave" title="Down an octave"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -257,6 +266,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
       <p>No sound on iPhone? Turn off Silent mode. Sound from web pages follows the ring/silent switch.</p>
       <p>Very low notes sound thin on a phone speaker. Headphones help.</p>
       <p id="installTip">Install as an app: on iPhone, open this page in Safari, tap Share, then Add to Home Screen. On Mac, open it in Safari and choose File &gt; Add to Dock.</p>
+      <p>Transpose works like retuning a guitar: −1 sounds like E♭ tuning, −2 like D tuning, +2 like a capo on fret 2. Key names stay the same, and the real pitch shows under the note.</p>
       <p class="desk-only">Computer keys: A W S E D F T G Y H U J K O L P play notes, Z and X move the octave.</p>
     </div>
   </div>
@@ -292,7 +302,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
 
   /* ---------- remembered settings (this browser only) ---------- */
   const STORE = 'note-checker-piano-v1';
-  const S = { sustain: false, acc: 'sharp', labels: 'all', middleC: 4, a4: 440, vol: 85, kw: 0, reverb: true, center: 60, history: [] };
+  const S = { sustain: false, acc: 'sharp', labels: 'all', middleC: 4, a4: 440, vol: 85, kw: 0, reverb: true, center: 60, transpose: 0, history: [] };
   try {
     const d = JSON.parse(localStorage.getItem(STORE) || 'null');
     if (d && typeof d === 'object') {
@@ -301,6 +311,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
       if (d.labels === 'all' || d.labels === 'c' || d.labels === 'off') S.labels = d.labels;
       if (d.middleC === 3 || d.middleC === 4) S.middleC = d.middleC;
       if (Number.isFinite(d.a4)) S.a4 = clamp(Math.round(d.a4), 420, 460);
+      if (Number.isInteger(d.transpose)) S.transpose = clamp(d.transpose, -12, 12);
       if (Number.isFinite(d.vol)) S.vol = clamp(Math.round(d.vol), 0, 100);
       if (Number.isFinite(d.kw) && d.kw > 0) S.kw = clamp(Math.round(d.kw), KW_MIN, KW_MAX);
       if (typeof d.reverb === 'boolean') S.reverb = d.reverb;
@@ -594,7 +605,9 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
     if (!c) return null;
     const old = voices.get(m);
     if (old) releaseVoice(old, 0.03);
-    const v = buildVoice(c, bus, m, c.currentTime + 0.005, freqOf(m));
+    const sounding = m + S.transpose;
+    const v = buildVoice(c, bus, sounding, c.currentTime + 0.005, freqOf(sounding));
+    v.m = m;   // voices are tracked by the key that was pressed
     v.o1.onended = () => dropVoice(v);
     voices.set(m, v);
     live.add(v);
@@ -630,12 +643,19 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
       bigEl.style.fontSize = size + 'px';
     }
   }
+  const TUNING = { '-1': 'E♭', '-2': 'D', '-3': 'C♯', '-4': 'C', '-5': 'B', '-6': 'B♭', '-7': 'A', '-8': 'A♭', '-9': 'G', '-10': 'F♯', '-11': 'F', '-12': 'E, an octave down' };
+  function transposeName(t) {
+    if (!t) return '';
+    return t < 0 ? TUNING[t] + ' tuning' : 'Capo ' + t;
+  }
+  const withTranspose = label => (S.transpose ? label + ' · ' + transposeName(S.transpose) : label);
   function showNote(m, prev, label) {
     shown = { kind: 'note', m, prev, label };
-    roLabel.textContent = label;
+    roLabel.textContent = withTranspose(label);
     bigEl.innerHTML = nameHTML(m) + (isWhite(m) ? '' : '<span class="alt">/ ' + nameOf(m, otherAcc()) + '</span>');
     sideEl.hidden = false;
-    sideEl.innerHTML = '<b>' + freqOf(m).toFixed(1) + '</b> Hz<br>MIDI ' + m;
+    const sounding = m + S.transpose;
+    sideEl.innerHTML = '<b>' + freqOf(sounding).toFixed(1) + '</b> Hz<br>MIDI ' + sounding;
     let sub = '';
     if (prev != null) {
       const d = m - prev;
@@ -646,6 +666,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
       }
     }
     if (m === 60) sub = sub ? 'Middle C · ' + sub : 'Middle C';
+    if (S.transpose) sub = 'Sounds as ' + nameOf(sounding) + (sub ? ' · ' + sub : '');
     subEl.textContent = sub || ' ';
     fitBig();
   }
@@ -655,15 +676,16 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
     sideEl.hidden = true;
     if (notes.length === 2) {
       const d = notes[1] - notes[0];
-      roLabel.textContent = 'Interval';
+      roLabel.textContent = withTranspose('Interval');
       bigEl.textContent = cap(intervalName(d));
       subEl.textContent = list + ' · ' + d + (d === 1 ? ' semitone' : ' semitones');
     } else {
       const ch = chordName(notes);
-      roLabel.textContent = 'Chord';
+      roLabel.textContent = withTranspose('Chord');
       if (ch) {
         bigEl.innerHTML = ch.html;
-        subEl.textContent = ch.long + ' · ' + list;
+        const real = S.transpose ? chordName(notes.map(n => n + S.transpose)) : null;
+        subEl.textContent = (real ? 'Sounds as ' + real.long + ' · ' : '') + ch.long + ' · ' + list;
       } else {
         bigEl.innerHTML = accify([...new Set(notes.map(m => pcName(m % 12)))].join(' '));
         subEl.textContent = 'No common chord name · ' + list;
@@ -799,6 +821,10 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
     setSeg('namesSeg', S.labels);
     setSeg('mcSeg', String(S.middleC));
     setSeg('revSeg', S.reverb ? 'on' : 'off');
+    const t = S.transpose;
+    $('trVal').textContent = t ? 'Transpose ' + (t > 0 ? '+' + t : '−' + Math.abs(t)) : 'Transpose';
+    $('trGroup').classList.toggle('on', !!t);
+    $('trGroup').title = t ? transposeName(t) : 'Transpose';
   }
   function renderNames() { renderKeyLabels(); refreshReadout(); updateMini(); }
   sustainBtn.addEventListener('click', () => {
@@ -810,6 +836,15 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
   accBtn.addEventListener('click', () => { S.acc = S.acc === 'flat' ? 'sharp' : 'flat'; syncControls(); renderNames(); save(); });
   $('zoomOut').addEventListener('click', () => { setKw(kw / 1.18); S.kw = kw; save(); });
   $('zoomIn').addEventListener('click', () => { setKw(kw * 1.18); S.kw = kw; save(); });
+  function setTranspose(t) {
+    S.transpose = clamp(t, -12, 12);
+    syncControls();
+    refreshReadout();
+    save();
+    toast(S.transpose ? 'Transpose ' + (S.transpose > 0 ? '+' : '−') + Math.abs(S.transpose) + ' · ' + transposeName(S.transpose) : 'Transpose off');
+  }
+  $('trDown').addEventListener('click', () => setTranspose(S.transpose - 1));
+  $('trUp').addEventListener('click', () => setTranspose(S.transpose + 1));
   $('vol').addEventListener('input', e => {
     S.vol = +e.target.value;
     $('volOut').textContent = S.vol + '%';
