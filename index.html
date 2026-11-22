@@ -25,7 +25,7 @@
 @font-face{font-family:"Barlow Condensed";font-style:normal;font-weight:600;font-display:swap;src:url(fonts/barlow-condensed-600.woff2) format("woff2")}
 @font-face{font-family:"Barlow Condensed";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/barlow-condensed-700.woff2) format("woff2")}
 :root{
-  /* Layout: tuner-style readout and a running note list on top, one control strip, then an 88-key keyboard across the bottom */
+  /* Layout: tuner-style readout filling the top, one control strip, then an 88-key keyboard across the bottom */
   --bg:#14120f;
   --panel:#1f1b17;
   --text:#f4eee5;
@@ -37,7 +37,7 @@
   --line:rgba(var(--text-rgb),.12);
   --font-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --font-body:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --big:64px;
+  --big:80px;
   color-scheme:dark;
 }
 [hidden]{display:none !important}
@@ -55,9 +55,9 @@ textarea,input{font:inherit;-webkit-user-select:text;user-select:text}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 svg{display:block}
 
-/* ---------- readout + note list ---------- */
+/* ---------- readout ---------- */
 .info{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:10px;padding:12px 16px 10px}
-.readout{flex:0 0 auto;display:flex;flex-direction:column;gap:2px;padding:6px 14px 12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;transition:border-color .6s ease-out}
+.readout{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:2px;padding:6px 14px 12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;transition:border-color .6s ease-out}
 .readout.hit{border-color:rgba(var(--accent-rgb),.75);transition:none}
 .ro-top{display:flex;align-items:center;gap:10px;min-height:34px}
 .ro-label{flex:1 1 auto;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -66,28 +66,15 @@ svg{display:block}
 .icon-btn{flex:0 0 auto;width:38px;height:34px;margin-right:-8px;display:grid;place-items:center;border-radius:10px;color:var(--muted)}
 .icon-btn svg{width:20px;height:20px}
 .icon-btn:active{background:rgba(var(--text-rgb),.08)}
-.ro-main{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;min-width:0}
+.ro-main{margin-top:auto;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;min-width:0}
 .big{flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap;font-family:var(--font-display);font-weight:700;font-size:var(--big);line-height:1;letter-spacing:.01em}
 .big .acc{font-family:var(--font-body);font-weight:600;font-size:.56em;vertical-align:.45em;margin-left:.02em}
 .big .oc{font-size:.55em;font-weight:600;color:var(--muted);margin-left:.04em}
 .big .alt{font-family:var(--font-body);font-size:.34em;font-weight:500;color:var(--muted);letter-spacing:0;margin-left:.6em;vertical-align:.3em}
 .ro-side{flex:0 0 auto;padding-bottom:6px;text-align:right;font-size:14px;line-height:1.35;color:var(--muted);font-variant-numeric:tabular-nums}
 .ro-side b{color:var(--text);font-weight:600}
-.ro-sub{min-height:20px;font-size:14.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ro-sub{margin-bottom:auto;min-height:20px;font-size:14.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.log{flex:1 1 auto;min-height:72px;display:flex;flex-direction:column;gap:8px;padding:6px 8px 10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
-.log-head{display:flex;align-items:center;gap:8px;min-height:34px}
-.log-title{margin:0;flex:1 1 auto;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
-.count{padding:1px 7px;border-radius:999px;background:rgba(var(--text-rgb),.08);color:var(--text);font-size:12px;letter-spacing:0;font-variant-numeric:tabular-nums}
-.log-actions{display:flex;gap:2px}
-.log-actions button{height:34px;min-width:36px;padding:0 8px;display:grid;place-items:center;border-radius:8px}
-.log-actions svg{width:18px;height:18px}
-.log-actions button:not(:disabled):active{background:rgba(var(--text-rgb),.08)}
-.log-actions .confirm{background:#6a2c1d;color:#ffe0cf;font-size:13px;font-weight:600}
-.chips{position:relative;flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;padding:0 6px 2px 0;touch-action:pan-y}
-.chip{height:32px;min-width:44px;padding:0 9px;border-radius:8px;background:rgba(var(--text-rgb),.06);border:1px solid var(--line);font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums}
-.chip:active,.chip.playing{background:var(--accent);border-color:var(--accent);color:#1d1406}
-.empty{margin:0;max-width:52ch;font-size:14px;line-height:1.45;color:var(--muted)}
 .desk-only{display:none}
 @media (hover:hover) and (pointer:fine){.desk-only{display:inline}.touch-only{display:none}}
 
@@ -160,7 +147,6 @@ input[type=range]{width:150px;accent-color:var(--accent)}
 .tips{display:grid;gap:6px;padding-top:12px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.45;color:var(--muted)}
 .tips p{margin:0}
 .sheet-note{margin:0;font-size:14px;color:var(--muted)}
-#copyText{width:100%;min-height:96px;padding:10px;border-radius:10px;background:#15120f;color:var(--text);border:1px solid var(--line);resize:vertical}
 
 /* installed app: keep clear of the notch, the status bar and the home indicator */
 body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)}
@@ -172,8 +158,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
 @media (orientation:landscape) and (max-height:560px){
   :root{--big:42px}
   .info{flex-direction:row;gap:10px;padding:8px 16px}
-  .readout{flex:0 0 44%;justify-content:space-between;padding:2px 12px 8px}
-  .log{min-height:0}
+  .readout{padding:2px 12px 8px}
   .toolbar{flex-direction:row;align-items:center;gap:10px;padding:0 16px 8px}
   .ctrls{flex:0 0 auto;flex-wrap:nowrap}
   .zoom{margin-left:0}
@@ -182,7 +167,6 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
 }
 @media (min-width:760px) and (min-height:561px){
   .info{flex-direction:row}
-  .readout{flex:0 0 40%;max-width:480px;justify-content:space-between}
   .toolbar{flex-direction:row;align-items:center;gap:12px}
   .ctrls{flex:0 0 auto}
   .zoom{margin-left:0}
@@ -206,21 +190,6 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
       <div class="ro-side" id="side"><b>261.6</b> Hz<br>MIDI 60</div>
     </div>
     <div class="ro-sub" id="sub">Middle C</div>
-  </section>
-
-  <section class="log" aria-labelledby="logTitle">
-    <div class="log-head">
-      <h2 class="log-title" id="logTitle">Notes played <span class="count" id="logCount">0</span></h2>
-      <div class="log-actions">
-        <button type="button" id="playLog" aria-label="Play the list" title="Play the list"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></button>
-        <button type="button" id="undoLog" aria-label="Remove the last note" title="Remove the last note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
-        <button type="button" id="copyLog" aria-label="Copy the list" title="Copy the list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
-        <button type="button" id="clearLog" aria-label="Clear the list" title="Clear the list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
-      </div>
-    </div>
-    <div class="chips" id="chips">
-      <p class="empty" id="empty">Every note you tap is listed here so you can write the song down. Tap a listed note to hear it again.<span class="touch-only"> No sound on iPhone? Turn off Silent mode.</span><span class="desk-only"> On a computer, keys A W S E D F T G Y H U J K play notes and Z / X move the octave.</span></p>
-    </div>
   </section>
 </main>
 
@@ -290,14 +259,6 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
       <p id="installTip">Install as an app: on iPhone, open this page in Safari, tap Share, then Add to Home Screen. On Mac, open it in Safari and choose File &gt; Add to Dock.</p>
       <p class="desk-only">Computer keys: A W S E D F T G Y H U J K O L P play notes, Z and X move the octave.</p>
     </div>
-  </div>
-</div>
-
-<div class="sheet-wrap" id="copySheet" hidden>
-  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="copyTitle">
-    <div class="sheet-head"><h2 id="copyTitle">Your notes</h2><button type="button" class="done">Done</button></div>
-    <p class="sheet-note">Copying is blocked in this view. Press and hold the text, then choose Copy.</p>
-    <textarea id="copyText" readonly rows="4"></textarea>
   </div>
 </div>
 
@@ -393,11 +354,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
   /* ---------- page elements ---------- */
   const keysEl = $('keys'), scroller = $('kbScroll'), miniEl = $('mini'), miniKeys = $('miniKeys'), miniWin = $('miniWin'), miniMark = $('miniMark');
   const roEl = $('readout'), roLabel = $('roLabel'), bigEl = $('big'), sideEl = $('side'), subEl = $('sub'), hintEl = $('hint');
-  const chipsEl = $('chips'), emptyEl = $('empty'), countEl = $('logCount');
-  const playBtn = $('playLog'), undoBtn = $('undoLog'), copyBtn = $('copyLog'), clearBtn = $('clearLog');
   const sustainBtn = $('sustainBtn'), accBtn = $('accBtn'), toastEl = $('toast');
-  const PLAY_SVG = playBtn.innerHTML, TRASH_SVG = clearBtn.innerHTML;
-  const STOP_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="1.5" fill="currentColor"/></svg>';
 
   /* ---------- build the keyboard and the overview strip ---------- */
   const keyEls = [], whiteIdx = [], WHITES = [], miniLabels = [];
@@ -817,160 +774,12 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
   window.addEventListener('blur', releaseAll);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
 
-  /* ---------- note list ---------- */
-  function chipFor(m, i) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'chip';
-    b.dataset.i = i;
-    b.textContent = nameOf(m);
-    return b;
-  }
-  function updateLogButtons() {
-    const none = !S.history.length;
-    [playBtn, undoBtn, copyBtn, clearBtn].forEach(b => { b.disabled = none; });
-    countEl.textContent = S.history.length;
-  }
-  function renderLog() {
-    chipsEl.textContent = '';
-    if (!S.history.length) chipsEl.appendChild(emptyEl);
-    else {
-      const f = document.createDocumentFragment();
-      S.history.forEach((m, i) => f.appendChild(chipFor(m, i)));
-      chipsEl.appendChild(f);
-    }
-    updateLogButtons();
-    chipsEl.scrollTop = chipsEl.scrollHeight;
-  }
+  /* ---------- recent notes, for the interval shown under the note ---------- */
   function addHistory(m) {
     S.history.push(m);
-    if (S.history.length > MAX_HIST) {
-      S.history.splice(0, S.history.length - MAX_HIST);
-      renderLog();
-    } else {
-      if (S.history.length === 1) chipsEl.textContent = '';
-      chipsEl.appendChild(chipFor(m, S.history.length - 1));
-      updateLogButtons();
-      chipsEl.scrollTop = chipsEl.scrollHeight;
-    }
+    if (S.history.length > MAX_HIST) S.history.splice(0, S.history.length - MAX_HIST);
     save();
   }
-  function flashKey(m) {
-    const el = keyEls[m];
-    el.classList.add('down');
-    setTimeout(() => { if (!held.has(m)) el.classList.remove('down'); }, 220);
-  }
-  function previewNote(m, i, dur) {
-    unlock();
-    const v = startVoice(m);
-    flashKey(m);
-    setLast(m);
-    ensureVisible(m);
-    hit();
-    showNote(m, i > 0 ? S.history[i - 1] : null, 'Note ' + (i + 1) + ' of ' + S.history.length);
-    if (v && !S.sustain) setTimeout(() => { if (!held.has(m)) releaseVoice(v); }, (dur || 0.6) * 1000);
-  }
-  chipsEl.addEventListener('click', e => {
-    const b = e.target.closest ? e.target.closest('.chip') : null;
-    if (!b) return;
-    const i = +b.dataset.i;
-    if (S.history[i] != null) previewNote(S.history[i], i);
-  });
-
-  let seqT = 0, seqI = 0;
-  function markChip(i) {
-    const was = chipsEl.querySelector('.chip.playing');
-    if (was) was.classList.remove('playing');
-    if (i < 0) return;
-    const c = chipsEl.children[i];
-    if (!c) return;
-    c.classList.add('playing');
-    const top = c.offsetTop, bottom = top + c.offsetHeight;
-    if (top < chipsEl.scrollTop || bottom > chipsEl.scrollTop + chipsEl.clientHeight) chipsEl.scrollTop = Math.max(0, top - 4);
-  }
-  function stopSeq() {
-    clearTimeout(seqT);
-    seqT = 0;
-    playBtn.innerHTML = PLAY_SVG;
-    playBtn.setAttribute('aria-label', 'Play the list');
-    playBtn.title = 'Play the list';
-    markChip(-1);
-  }
-  function stepSeq() {
-    if (seqI >= S.history.length) { stopSeq(); return; }
-    markChip(seqI);
-    previewNote(S.history[seqI], seqI, 0.36);
-    seqI++;
-    seqT = setTimeout(stepSeq, 430);
-  }
-  playBtn.addEventListener('click', () => {
-    if (seqT) { stopSeq(); return; }
-    if (!S.history.length) return;
-    seqI = 0;
-    playBtn.innerHTML = STOP_SVG;
-    playBtn.setAttribute('aria-label', 'Stop playing');
-    playBtn.title = 'Stop playing';
-    stepSeq();
-  });
-  undoBtn.addEventListener('click', () => {
-    if (!S.history.length) return;
-    stopSeq();
-    S.history.pop();
-    const last = chipsEl.lastElementChild;
-    if (S.history.length && last && last.classList.contains('chip')) { last.remove(); updateLogButtons(); }
-    else renderLog();
-    save();
-  });
-  let clearArm = 0;
-  function disarmClear() {
-    clearTimeout(clearArm);
-    clearArm = 0;
-    clearBtn.classList.remove('confirm');
-    clearBtn.innerHTML = TRASH_SVG;
-  }
-  clearBtn.addEventListener('click', () => {
-    if (!S.history.length) return;
-    if (!clearArm) {
-      clearBtn.classList.add('confirm');
-      clearBtn.textContent = 'Clear all?';
-      clearArm = setTimeout(disarmClear, 2600);
-      return;
-    }
-    disarmClear();
-    stopSeq();
-    S.history = [];
-    renderLog();
-    save();
-    toast('Note list cleared');
-  });
-  async function copyText(text) {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); return true; }
-    } catch (e) { /* fall through */ }
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.setAttribute('readonly', '');
-      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
-      document.body.appendChild(ta);
-      ta.select();
-      ta.setSelectionRange(0, text.length);
-      const ok = document.execCommand && document.execCommand('copy');
-      document.body.removeChild(ta);
-      if (ok) return true;
-    } catch (e) { /* fall through */ }
-    return false;
-  }
-  copyBtn.addEventListener('click', async () => {
-    if (!S.history.length) return;
-    const text = S.history.map(m => plain(nameOf(m))).join(' ');
-    if (await copyText(text)) toast('Copied ' + S.history.length + (S.history.length === 1 ? ' note' : ' notes'));
-    else {
-      $('copyText').value = text;
-      openSheet('copySheet');
-      setTimeout(() => { const t = $('copyText'); t.focus(); t.select(); }, 60);
-    }
-  });
 
   /* ---------- controls and settings ---------- */
   let toastT = 0;
@@ -991,7 +800,7 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
     setSeg('mcSeg', String(S.middleC));
     setSeg('revSeg', S.reverb ? 'on' : 'off');
   }
-  function renderNames() { renderKeyLabels(); renderLog(); refreshReadout(); updateMini(); }
+  function renderNames() { renderKeyLabels(); refreshReadout(); updateMini(); }
   sustainBtn.addEventListener('click', () => {
     S.sustain = !S.sustain;
     if (!S.sustain) [...live].forEach(v => { if (!held.has(v.m)) releaseVoice(v); });
@@ -1058,7 +867,6 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area
   renderKeyLabels();
   syncControls();
   setKw(S.kw || defaultKw(), S.center);
-  renderLog();
   if (S.history.length) {
     const n = S.history.length, m = S.history[n - 1];
     setLast(m);

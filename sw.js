@@ -1,6 +1,6 @@
 // Note Checker Piano: keeps the app working offline.
 // Bump VERSION whenever any file changes so phones and Macs pick up the update.
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = 'note-checker-piano-' + VERSION;
 const FILES = [
   './',
